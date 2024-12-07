@@ -15,15 +15,15 @@ Create the inventory database and run the provided SQL script.
 Configure the database connection in database.php.
 
 ## Endpoints
-GET /products
+**GET /products**
 
 Lists all products.
 
-GET /products/id
+**GET /products/id**
 
 Just get one product by id.
 
-POST /products
+**POST /products**
 
 Adds a new product. 
 
@@ -41,7 +41,7 @@ Example JSON:
     
 }
 
-PUT /products/{id}
+**PUT /products/{id}**
 
 Updates an existing product by id. 
 
@@ -59,12 +59,12 @@ Example JSON:
     
 }
 
-DELETE /products/{id}
+**DELETE /products/{id}**
 
 Deletes a product by ID.
 
 # Notes
 
-*The database name is inventory.
-*All requests require the correct Content-Type header, set to application/json when sending data.
-*The frontend part can be run in visual studio with some extension, for example: live server
+-The database name is inventory.
+-All requests require the correct Content-Type header, set to application/json when sending data.
+-The frontend part can be run in visual studio with some extension, for example: live server
