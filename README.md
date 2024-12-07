@@ -66,5 +66,7 @@ Deletes a product by ID.
 # Notes
 
 -The database name is inventory.
+
 -All requests require the correct Content-Type header, set to application/json when sending data.
+
 -The frontend part can be run in visual studio with some extension, for example: live server
