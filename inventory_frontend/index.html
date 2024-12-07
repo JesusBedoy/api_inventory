@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inventory</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body class="bg-light">
+    <div class="container my-5">
+      <h1 class="text-center mb-4">Product Management</h1>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 text-secondary">Product List</h2>
+        <button
+          class="btn btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#productModal"
+        >
+          <i class="bi bi-plus-circle"></i> Add Product
+        </button>
+      </div>
+      <div class="table-responsive shadow-sm rounded bg-white">
+        <table class="table table-hover text-center align-middle">
+          <thead class="table-primary">
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="productTableBody">
+            <!-- Data will be filled dynamically for rendertable()-->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Dynamic Modal to Add/Edit Product -->
+    <div
+      class="modal fade"
+      id="productModal"
+      tabindex="-1"
+      aria-labelledby="productModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="productForm">
+            <div class="modal-header">
+              <h5 class="modal-title" id="productModalLabel">Add Product</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="productId" />
+              <div class="mb-3">
+                <label for="productName" class="form-label"
+                  >Name of product</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="productName"
+                  placeholder="Enter the product name"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="productPrice" class="form-label">Price</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  id="productPrice"
+                  placeholder="Enter the price"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="productQuantity" class="form-label">Quantity</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="productQuantity"
+                  placeholder="Enter the quantity"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="productDescription" class="form-label"
+                  >Description</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="productDescription"
+                  placeholder="Enter the description"
+                  required
+                />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      const apiUrl = "http://localhost:8080/api_inventory/products";
+      const productTableBody = document.getElementById("productTableBody");
+      const productForm = document.getElementById("productForm");
+      const productModalLabel = document.getElementById("productModalLabel");
+      const productModal = document.getElementById("productModal");
+      const productId = document.getElementById("productId");
+      const productName = document.getElementById("productName");
+      const productPrice = document.getElementById("productPrice");
+      const productQuantity = document.getElementById("productQuantity");
+      const productDescription = document.getElementById("productDescription");
+
+      // Fetch products from the API for table
+      async function fetchProducts() {
+        try {
+          const response = await fetch(apiUrl);
+
+          if (!response.ok) throw new Error("Error fetching products");
+          const data = await response.json();
+
+          renderTable(data);
+        } catch (error) {
+          console.error("Error fetching products:", error);
+        }
+      }
+
+      // Render the table with products
+      function renderTable(products) {
+        productTableBody.innerHTML = "";
+        products.forEach((product) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+                    <td>${product.id}</td>
+                    <td>${product.name}</td>
+                    <td>${product.price}</td>
+                    <td>${product.quantity}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-2" onclick="fillProduct(${product.id})">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">Delete</button>
+                    </td>
+                `;
+          productTableBody.appendChild(row);
+        });
+      }
+
+      // Add or edit product
+      productForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = productId.value;
+        const name = productName.value;
+        const price = parseFloat(productPrice.value);
+        const quantity = parseInt(productQuantity.value);
+        const description = productDescription.value;
+
+        const productData = { name, price, quantity, description };
+
+        try {
+          const response = await fetch(id ? `${apiUrl}/${id}` : apiUrl, {
+            method: id ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(productData),
+          });
+          if (!response.ok) throw new Error("Error saving product");
+          fetchProducts();
+          productForm.reset();
+          productId.value = "";
+          productModalLabel.textContent = "Add Product";
+          bootstrap.Modal.getInstance(
+            document.getElementById("productModal")
+          ).hide();
+        } catch (error) {
+          console.error("Error saving product:", error);
+        }
+      });
+
+      // Delete product
+      async function deleteProduct(id) {
+        try {
+          const response = await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
+          if (!response.ok) throw new Error("Error deleting product");
+          fetchProducts();
+        } catch (error) {
+          console.error("Error deleting product:", error);
+        }
+      }
+
+      // fill Edit product data
+      async function fillProduct(id) {
+        try {
+          const response = await fetch(`${apiUrl}/${id}`, { method: "GET" });
+          if (!response.ok) throw new Error("Error fetching product");
+          const product = await response.json();
+          productId.value = product.id;
+          productName.value = product.name;
+          productPrice.value = product.price;
+          productQuantity.value = product.quantity;
+          productDescription.value = product.description;
+          productModalLabel.textContent = "Edit Product";
+          const modal = new bootstrap.Modal(
+            document.getElementById("productModal")
+          );
+          modal.show();
+        } catch (error) {
+          console.error("Error fetching product:", error);
+        }
+      }
+
+      // Clear the form when closing the edit modal
+      productModal.addEventListener("hidden.bs.modal", () => {
+        const productForm = document.getElementById("productForm");
+        productForm.reset(); // Reset the form values
+        document.getElementById("productId").value = "";
+        productModalLabel.textContent = "Add Product";
+      });
+
+      // Load products on startup
+      fetchProducts();
+    </script>
+  </body>
+</html>
