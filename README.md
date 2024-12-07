@@ -1,16 +1,16 @@
-#Inventory API
+# Inventory API
 ***
-##Requirements
+## Requirements
 PHP 8.0+
 MySQL
 Local server (XAMPP, WAMP, etc.)
 
-##Setup
+## Setup
 Clone this repository.
 Create the inventory database and run the provided SQL script.
 Configure the database connection in database.php.
 
-##Endpoints
+## Endpoints
 GET /products
 Lists all products.
 
